@@ -16,32 +16,22 @@ using cAlgo.API.Internals;
 
 namespace cAlgo.Robots
 {
-    
+
     [Robot(TimeZone = TimeZones.UTC, AccessRights = AccessRights.None)]
     public class SARTrailingStop : Robot
     {
 
-        #region Enums
-
-        #endregion
-
         #region Identity
 
-        /// <summary>
-        /// Nome del prodotto, identificativo, da modificare con il nome della propria creazione
-        /// </summary>
         public const string NAME = "SAR Trailing Stop";
 
-        /// <summary>
-        /// La versione del prodotto, progressivo, utilie per controllare gli aggiornamenti se viene reso disponibile sul sito ctrader.guru
-        /// </summary>
         public const string VERSION = "1.0.2";
 
         #endregion
 
         #region Params
 
-        [Parameter(NAME + " " + VERSION, Group = "Identity", DefaultValue = "https://ctrader.guru/product/sar-trailing-stop/")]
+        [Parameter(NAME + " " + VERSION, Group = "Identity", DefaultValue = "https://www.google.com/search?q=ctrader+guru+sar+trailing+stop")]
         public string ProductInfo { get; set; }
 
         [Parameter("Min AF", Group = "Params", DefaultValue = 0.02, MinValue = 0)]
@@ -55,16 +45,11 @@ namespace cAlgo.Robots
 
         #endregion
 
-        #region Property
-        
-        #endregion
-
         #region cBot Events
 
         protected override void OnStart()
         {
 
-            // --> Stampo nei log la versione corrente
             Print("{0} : {1}", NAME, VERSION);
 
         }
@@ -72,20 +57,18 @@ namespace cAlgo.Robots
         protected override void OnTick()
         {
 
-            // --> Fermiamo in automatico
-            _checkAutoStop();
+            CheckAutoStop();
 
         }
 
         protected override void OnBar()
         {
-            
-            // --> Al momento le API non forniscono un metodo per ottenere tutte le posizioni di un simbolo se non per LABEL
-            // --> quindi devo ciclare
+
             foreach (var position in Positions)
             {
 
-                if (position.SymbolName != SymbolName) continue;
+                if (position.SymbolName != SymbolName)
+                    continue;
 
                 bool canModify = false;
                 double SARlevel = Math.Round(Indicators.ParabolicSAR(MinAF, MaxAF).Result.LastValue, Symbol.Digits);
@@ -106,7 +89,8 @@ namespace cAlgo.Robots
 
                 }
 
-                if (canModify && SARlevel != position.StopLoss) ModifyPositionAsync(position, SARlevel, position.TakeProfit);
+                if (canModify && SARlevel != position.StopLoss)
+                    ModifyPositionAsync(position, SARlevel, position.TakeProfit);
 
             }
 
@@ -116,22 +100,22 @@ namespace cAlgo.Robots
 
         #region Private Methods
 
-        private void _checkAutoStop()
+        private void CheckAutoStop()
         {
 
-            if (!AutoStop) return;
+            if (!AutoStop)
+                return;
 
             foreach (var position in Positions)
             {
 
-                if (position.SymbolName != SymbolName) continue;
+                if (position.SymbolName != SymbolName)
+                    continue;
 
-                // --> Ok c'è una posizione interrompo e basta
                 return;
 
             }
 
-            // --> Se non ho interrotto vuol dire che non c'è nulla per noi, quindi fermo tutto;
             Stop();
 
         }
@@ -139,5 +123,5 @@ namespace cAlgo.Robots
         #endregion
 
     }
-    
+
 }
